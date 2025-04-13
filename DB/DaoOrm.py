@@ -1,35 +1,54 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
+from typing import Generic, TypeVar, Type, List, Optional
+from sqlalchemy.orm import Session
+
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+T = TypeVar('T')
 
-class Database:
-    def __init__(self):
-        self._user = os.getenv("DB_USER")
-        self._password = os.getenv("DB_PASSWORD")
-        self._host = os.getenv("DB_HOST")
-        self._port = os.getenv("DB_PORT")
-        self._name = os.getenv("DB_NAME")
-
-        self._url = (
-            f"postgresql+psycopg2://{self._user}:{self._password}"
-            f"@{self._host}:{self._port}/{self._name}"
+DATABASE_URL = (
+            f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
+            f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
         )
 
-        self._engine = create_engine(self._url, echo=False)
-        self._session_maker = sessionmaker(bind=self._engine, autocommit=False, autoflush=False)
-
-    @property
-    def session(self):
-        return self._session_maker()
-
-    @property
-    def engine(self):
-        return self._engine
+engine = create_engine(DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(bind=engine)
 
 
-    def close_connection(self):
-        self._engine.dispose()
-        print("connection to SQLAlchemy closed.")
+class GenericDAO(Generic[T]):
+    def __init__(self, session: Session, model: Type[T]):
+        self.session = session
+        self.model = model
+
+    def get_by_id(self, id_: int) -> Optional[T]:
+        return self.session.get(self.model, id_)
+
+    def get_all(self) -> List[T]:
+        return self.session.query(self.model).all()
+
+    def add(self, obj: T) -> None:
+        try:
+            self.session.add(obj)
+            self.session.commit()
+        except:
+            self.session.rollback()
+            raise
+
+    def update(self, obj: T) -> None:
+        try:
+            self.session.merge(obj)
+            self.session.commit()
+        except:
+            self.session.rollback()
+            raise
+
+    def delete(self, obj: T) -> None:
+        try:
+            self.session.delete(obj)
+            self.session.commit()
+        except:
+            self.session.rollback()
+            raise
