@@ -1,8 +1,11 @@
 from typing import List, Optional
+from typing import TYPE_CHECKING
 from sqlalchemy import  PrimaryKeyConstraint,  String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
-from .orders import Orders
+
+if TYPE_CHECKING:
+    from .orders import Orders
 
 class Customers(Base):
     __tablename__ = 'customers'

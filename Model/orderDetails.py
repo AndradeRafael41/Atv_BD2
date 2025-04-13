@@ -1,11 +1,14 @@
 
 from typing import Optional
+from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, SmallInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import decimal
 from .base import Base
-from .orders import Orders
-from .products import Products
+
+if TYPE_CHECKING:
+    from .orders import Orders
+    from .products import Products
 
 
 class OrderDetails(Base):

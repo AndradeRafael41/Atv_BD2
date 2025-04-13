@@ -1,12 +1,15 @@
 from typing import List, Optional
+from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, String
 from sqlalchemy.orm import  Mapped, mapped_column, relationship
 import datetime
 import decimal
 from .base import Base
-from .costumers import Customers
-from .employees import Employees
-from .orderDetails import OrderDetails
+
+if TYPE_CHECKING:
+    from .costumers import Customers
+    from .employees import Employees
+    from .orderDetails import OrderDetails
 
 class Orders(Base):
     __tablename__ = 'orders'

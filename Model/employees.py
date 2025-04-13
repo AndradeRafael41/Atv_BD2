@@ -1,10 +1,14 @@
 from typing import List, Optional
+from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, Integer,  PrimaryKeyConstraint, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import datetime
-from .orders import Orders
 from .base import Base
 
+
+if TYPE_CHECKING:
+    from .orders import Orders
+    
 class Employees(Base):
     __tablename__ = 'employees'
     __table_args__ = (
