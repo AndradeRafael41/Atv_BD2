@@ -6,7 +6,7 @@ class newOrder:
     def __init__(self):
         self.window = tk.Tk()
         self.window.resizable(0,0)
-        self.window.geometry("400x400")
+        self.window.geometry("800x400")
         self.window.title("Novo Pedido")
 
         tk.Label(self.window, text="Nome do Cliente:").place(relx=0.1, rely=0.1)
@@ -45,6 +45,6 @@ class newOrder:
         country.place(relx=0.5, rely=0.8)
 
         tk.Button(self.window, text="Voltar").place(relx=0.1, rely=0.9)
-        tk.Button(self.window, text="Enviar").place(relx=0.8, rely=0.9)
+        tk.Button(self.window, text="Regis").place(relx=0.8, rely=0.9)
 
         self.window.mainloop()
