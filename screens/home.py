@@ -3,8 +3,6 @@ from screens.reportEmployees import reportEmployees
 from screens.reportOrders import reportOrders
 import tkinter as tk
 
-
-
 class home:
 
     def __init__(self):
