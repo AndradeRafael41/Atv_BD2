@@ -1,6 +1,6 @@
 from typing import List, Optional
 from typing import TYPE_CHECKING
-from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, String
+from sqlalchemy import DateTime, ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, String, Sequence
 from sqlalchemy.orm import  Mapped, mapped_column, relationship
 import datetime
 import decimal
@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from .employees import Employees
     from .orderDetails import OrderDetails
 
+order_id_seq = Sequence('orders_id_sequence')
+
+
 class Orders(Base):
     __tablename__ = 'orders'
     __table_args__ = (
@@ -20,7 +23,7 @@ class Orders(Base):
         {'schema': 'northwind'}
     )
 
-    orderid: Mapped[int] = mapped_column(Integer, primary_key=True)
+    orderid: Mapped[int] = mapped_column(Integer, order_id_seq, primary_key=True, server_default=order_id_seq.next_value())
     customerid: Mapped[str] = mapped_column(String(5))
     employeeid: Mapped[int] = mapped_column(Integer)
     orderdate: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)

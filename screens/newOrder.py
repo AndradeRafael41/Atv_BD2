@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from Controller.pedido_controller import PedidoController
 from tkinter import messagebox
+from tkcalendar import Calendar, DateEntry
 
 class newOrder:
 
@@ -9,61 +10,80 @@ class newOrder:
         self.controller = PedidoController()
         self.window = tk.Tk()
         self.window.resizable(0,0)
-        self.window.geometry("800x400")
-        self.window.resizable(0, 0)
-        self.window.geometry("400x400")
+        self.window.geometry("600x600")
         self.window.title("Novo Pedido")
 
         # ---------- CLIENTES ----------
-        tk.Label(self.window, text="Nome do Cliente:").place(relx=0.1, rely=0.1)
+        tk.Label(self.window, text="Nome do Cliente:").place(relx=0.1, rely=0.05)
         self.clients = self.controller.listar_clientes()
-        self.client_map = {f"{c.companyname} ({c.customerid})": c.customerid for c in self.clients}
-        self.client_combo = ttk.Combobox(self.window, values=list(self.client_map.keys()), state="readonly")
-        self.client_combo.place(relx=0.5, rely=0.1)
+        self.client_map = {f"{c.companyname}": c.customerid for c in self.clients}
+        self.client_combo = ttk.Combobox(self.window, values=list(self.client_map.keys()), state="readonly", width=19)
+        self.client_combo.place(relx=0.5, rely=0.05)
         self.client_combo.current(0)
 
         # ---------- FUNCIONÁRIOS ----------
-        tk.Label(self.window, text="Nome do Vendedor:").place(relx=0.1, rely=0.2)
+        tk.Label(self.window, text="Nome do Vendedor:").place(relx=0.1, rely=0.1)
         self.employees = self.controller.listar_funcionarios()
-        self.employee_map = {f"{e.firstname} {e.lastname} ({e.employeeid})": e.employeeid for e in self.employees}
-        self.employee_combo = ttk.Combobox(self.window, values=list(self.employee_map.keys()), state="readonly")
-        self.employee_combo.place(relx=0.5, rely=0.2)
+        self.employee_map = {f"{e.firstname} {e.lastname}": e.employeeid for e in self.employees}
+        self.employee_combo = ttk.Combobox(self.window, values=list(self.employee_map.keys()), state="readonly", width=19)
+        self.employee_combo.place(relx=0.5, rely=0.1)
         self.employee_combo.current(0)
 
         # ---------- REMETENTES ----------
-        tk.Label(self.window, text="Remetente:").place(relx=0.1, rely=0.3)
+        tk.Label(self.window, text="Remetente:").place(relx=0.1, rely=0.14)
         self.shippers = self.controller.listar_entregadores()
-        self.shipper_map = {f"{s.companyname} ({s.shipperid})": s.shipperid for s in self.shippers}
-        self.shipper_combo = ttk.Combobox(self.window, values=list(self.shipper_map.keys()), state="readonly")
-        self.shipper_combo.place(relx=0.5, rely=0.3)
+        self.shipper_map = {f"{s.companyname}": s.shipperid for s in self.shippers}
+        self.shipper_combo = ttk.Combobox(self.window, values=list(self.shipper_map.keys()), state="readonly", width=19)
+        self.shipper_combo.place(relx=0.5, rely=0.15)
         self.shipper_combo.current(0)
 
         # ---------- OUTROS CAMPOS ----------
-        tk.Label(self.window, text="Código Postal:").place(relx=0.1, rely=0.4)
+        tk.Label(self.window, text="Código Postal:").place(relx=0.1, rely=0.2)
         self.postalCode = tk.Entry(self.window)
-        self.postalCode.place(relx=0.5, rely=0.4)
+        self.postalCode.place(relx=0.5, rely=0.2)
 
-        tk.Label(self.window, text="Endereço:").place(relx=0.1, rely=0.5)
+        tk.Label(self.window, text="Endereço:").place(relx=0.1, rely=0.25)
         self.address = tk.Entry(self.window)
-        self.address.place(relx=0.5, rely=0.5)
+        self.address.place(relx=0.5, rely=0.25)
 
-        tk.Label(self.window, text="Cidade:").place(relx=0.1, rely=0.6)
+        tk.Label(self.window, text="Cidade:").place(relx=0.1, rely=0.3)
         self.city = tk.Entry(self.window)
-        self.city.place(relx=0.5, rely=0.6)
+        self.city.place(relx=0.5, rely=0.3)
 
-        tk.Label(self.window, text="Região:").place(relx=0.1, rely=0.7)
+        tk.Label(self.window, text="Região:").place(relx=0.1, rely=0.35)
         self.region = tk.Entry(self.window)
-        self.region.place(relx=0.5, rely=0.7)
+        self.region.place(relx=0.5, rely=0.35)
 
-        tk.Label(self.window, text="País:").place(relx=0.1, rely=0.8)
+        tk.Label(self.window, text="País:").place(relx=0.1, rely=0.4)
         self.country = tk.Entry(self.window)
-        self.country.place(relx=0.5, rely=0.8)
+        self.country.place(relx=0.5, rely=0.4)
 
-        tk.Button(self.window, text="Voltar").place(relx=0.1, rely=0.9)
-        tk.Button(self.window, text="Regis").place(relx=0.8, rely=0.9)
+        tk.Label(self.window, text="Nome do Navio:").place(relx=0.1, rely=0.45)
+        self.shipName = tk.Entry(self.window)
+        self.shipName.place(relx=0.5, rely=0.45)
+
+        ttk.Label(self.window, text='Data Pretendida').place(relx=0.1, rely=0.5)
+        self.requiredDate = DateEntry(self.window, width=19, background='darkblue', foreground='white', borderwidth=2, year=2025)
+        self.requiredDate.place(relx=0.5, rely=0.5)
+
+        ttk.Label(self.window, text='Data de Postagem').place(relx=0.1, rely=0.55)
+        self.shippedDate = DateEntry(self.window, width=19, background='darkblue', foreground='white', borderwidth=2, year=2025)
+        self.shippedDate.place(relx=0.5, rely=0.55)
+
+        tk.Label(self.window, text="Frete:").place(relx=0.1, rely=0.6)
+        self.freight = tk.Entry(self.window)
+        self.freight.place(relx=0.5, rely=0.6)
+
+        tk.Label(self.window, text="Produto:").place(relx=0.1, rely=0.65)
+        self.products = self.controller.listar_produtos()
+        self.product_map = {f"{p.productname}": p.productid for p in self.products}
+        self.product_combo = ttk.Combobox(self.window, values=list(self.product_map.keys()), state="readonly", width=19)
+        self.product_combo.place(relx=0.5, rely=0.65)
+        self.product_combo.current(0)
+
         # ---------- BOTÕES ----------
-        tk.Button(self.window, text="Voltar", command=self.voltar).place(relx=0.1, rely=0.9)
-        tk.Button(self.window, text="Enviar", command=self.enviar_pedido).place(relx=0.8, rely=0.9)
+        tk.Button(self.window, text="Voltar", command=self.voltar).place(relx=0.1, rely=0.7)
+        tk.Button(self.window, text="Enviar", command=self.enviar_pedido).place(relx=0.75, rely=0.7)
 
         self.window.mainloop()
 
@@ -82,15 +102,24 @@ class newOrder:
             pais = self.country.get()
             cep = self.postalCode.get()
 
+            requiredDate = self.requiredDate.get()
+            shippedDate = self.shippedDate.get()
+            freight = self.freight.get()
+            shipName = self.shipName.get()
+
             self.controller.criar_pedido(
-                customerid=cliente_id,
-                employeeid=funcionario_id,
-                shipperid=shipper_id,
-                endereco=endereco,
-                cidade=cidade,
-                regiao=regiao,
-                pais=pais,
-                cep=cep
+                customerid = cliente_id,
+                employeeid = funcionario_id,
+                shipperid = shipper_id,
+                endereco = endereco,
+                cidade = cidade,
+                regiao = regiao,
+                pais = pais,
+                cep = cep,
+                requiredDate = requiredDate,
+                shippedDate = shippedDate,
+                freight = freight,
+                shipName = shipName
             )
 
             messagebox.showinfo("Sucesso", "Pedido criado com sucesso!")
