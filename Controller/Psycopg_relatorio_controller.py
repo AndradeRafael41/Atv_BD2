@@ -6,7 +6,7 @@ class RelatorioController:
         # Inicializa o DAO e outras dependências conforme necessário
         pass
 
-    def listar_order_report_por_orderid(self, orderid):
+    def relatorio_pedidos(self, orderid):
         """
         Retorna os dados da view 'order_report' filtrados por 'orderid'.
         """
@@ -38,7 +38,7 @@ class RelatorioController:
             print(f"Erro ao executar a consulta: {e}")
             return None
 
-    def listar_employee_sales_ranking(self, data_inicio, data_fim):
+    def ranking_funcionarios (self, data_inicio, data_fim):
             """
             Retorna o ranking de vendas dos funcionários com base no intervalo de datas informado.
             """
