@@ -30,7 +30,7 @@ class PedidoController:
         requiredDate,
         shippedDate,
         shipName,
-        products
+        order_details
     ):
         novo_pedido = Orders(
             customerid = customerid,
@@ -46,7 +46,7 @@ class PedidoController:
             shippostalcode = cep,
             shipcountry = pais,
             shipperid = shipperid,
-            order_details = products
+            order_details = order_details
         )
         self.dao.add(novo_pedido)
 

@@ -210,7 +210,7 @@ class newOrder:
                 'freight': self.widgets['Frete'].get(),
                 'order_details': self.details
             }
-            if(self.tipo_conexao=='orm'):
+            if(self.tipo_conexao.get()=='orm'):
                 self.controller.criar_pedido(**data)
             else:
                 self.controllerDriver.criar_pedido(**data)
