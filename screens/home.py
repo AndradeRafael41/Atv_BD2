@@ -4,32 +4,73 @@ from screens.reportOrders import reportOrders
 import tkinter as tk
 
 class home:
-    
     def __init__(self):
+        # Configuração da janela principal
         self.window = tk.Tk()
-        self.window.resizable(0,0)
-        self.window.geometry('200x200')
+        self.window.resizable(False, False)
+        self.window.geometry('300x200')
         self.window.title('Home')
+        # Adiciona padding na janela
+        self.window.configure(padx=20, pady=20)
 
-        btNewOrder = tk.Button(self.window, text="Novo Pedido", width="16", command=self.newOrderClick)
-        btNewOrder.place(relx=0.1, rely=0.1)
+        # Frame principal para os botões
+        frame = tk.Frame(self.window)
+        frame.pack(expand=True, fill='both')
 
-        btOrders = tk.Button(self.window, text="Relatório Pedidos", width="16", command=self.reportOrdersClick)
-        btOrders.place(relx=0.1, rely=0.4)
+        # Fonte padrão para botões
+        btn_font = ("Helvetica", 12)
 
-        btEmployees = tk.Button(self.window, text="Relatório Funcionários", width="16", command=self.reportEmployeesClick)
-        btEmployees.place(relx=0.1, rely=0.7)
+        # Botão Novo Pedido
+        btNewOrder = tk.Button(
+            frame,
+            text="Novo Pedido",
+            font=btn_font,
+            width=20,
+            pady=5,
+            command=self.newOrderClick
+        )
+        btNewOrder.pack(fill='x', pady=5)
 
-        self.window.mainloop()
+        # Botão Relatório Pedidos
+        btOrders = tk.Button(
+            frame,
+            text="Relatório Pedidos",
+            font=btn_font,
+            width=20,
+            pady=5,
+            command=self.reportOrdersClick
+        )
+        btOrders.pack(fill='x', pady=5)
+
+        # Botão Relatório Funcionários
+        btEmployees = tk.Button(
+            frame,
+            text="Relatório Funcionários",
+            font=btn_font,
+            width=20,
+            pady=5,
+            command=self.reportEmployeesClick
+        )
+        btEmployees.pack(fill='x', pady=5)
 
     def newOrderClick(self):
+        # Destrói a janela atual e abre o módulo de Novo Pedido
         self.window.destroy()
-        newOrder()
+        app = newOrder()
+        app.run()
 
     def reportEmployeesClick(self):
+        # Destrói a janela atual e abre o relatório de Funcionários
         self.window.destroy()
-        reportEmployees()
+        app = reportEmployees()
+        app.run()
 
     def reportOrdersClick(self):
+        # Destrói a janela atual e abre o relatório de Pedidos
         self.window.destroy()
-        reportOrders()
+        app = reportOrders()
+        app.run()
+
+    def run(self):
+        # Executa o loop principal da interface
+        self.window.mainloop()
