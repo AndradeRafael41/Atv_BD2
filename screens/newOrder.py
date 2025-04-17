@@ -15,7 +15,7 @@ class newOrder:
         self.window = tk.Tk()
         self.window.title("Novo Pedido")
         self.window.resizable(False, False)
-        self.window.geometry("640x620")
+        self.window.geometry("640x700")
         self.window.configure(padx=20, pady=20)
 
         self.font = ("Helvetica", 11)
