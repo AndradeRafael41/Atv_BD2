@@ -30,13 +30,13 @@ class RelatorioController:
         pedidos = (
             self.session.query(Orders)
             .options(
-                joinedload(Orders.customers),          # Carrega informações do cliente
-                joinedload(Orders.employees),          # Carrega informações do funcionário
-                joinedload(Orders.order_details)       # Carrega os detalhes do pedido
-                .joinedload(OrderDetails.products)     # Carrega os produtos
+                joinedload(Orders.customers),
+                joinedload(Orders.employees),
+                joinedload(Orders.order_details)
+                .joinedload(OrderDetails.products)
             )
             .filter(Orders.orderid == id)
-            .first()  # ou .one() se quiser que lance exceção se não encontrar
+            .first()  
         )
         return pedidos
     

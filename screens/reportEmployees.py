@@ -45,7 +45,6 @@ class reportEmployees:
         btn_voltar.pack(pady=(0, 10))
 
     def buscar_ranking(self):
-        # Limpa a treeview
         for item in self.tree.get_children():
             self.tree.delete(item)
 

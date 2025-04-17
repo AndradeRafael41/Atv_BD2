@@ -3,21 +3,39 @@ from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 from Model.orderDetails import OrderDetails
 from Controller.pedido_controller import PedidoController
+from Controller.Psycopg_pedido_controller import PedidoControllerDriver
 
 class newOrder:
     def __init__(self):
         self.controller = PedidoController()
+        self.controllerDriver = PedidoControllerDriver()
         self.details = []
 
         # Configuração da janela
         self.window = tk.Tk()
         self.window.title("Novo Pedido")
         self.window.resizable(False, False)
-        self.window.geometry("640x580")
+        self.window.geometry("640x620")
         self.window.configure(padx=20, pady=20)
 
         self.font = ("Helvetica", 11)
         self.input_width = 18
+        
+        self.tipo_conexao = tk.StringVar(value="orm")
+
+        # Frame para os radio buttons no topo da janela
+        radio_frame = tk.Frame(self.window)
+        radio_frame.pack(fill='x', pady=(0, 10))
+
+        tk.Label(radio_frame, text="Tipo de conexão:", font=self.font).pack(side='left', padx=(0, 10))
+        tk.Radiobutton(
+            radio_frame, text="ORM", variable=self.tipo_conexao,
+            value="orm", font=self.font
+        ).pack(side='left')
+        tk.Radiobutton(
+            radio_frame, text="Driver", variable=self.tipo_conexao,
+            value="driver", font=self.font
+        ).pack(side='left')
 
         # Frame para dados do pedido
         pedido_frame = tk.LabelFrame(self.window, text="Detalhes do Pedido", font=self.font)
@@ -65,7 +83,7 @@ class newOrder:
                 widget.grid(row=row, column=widget_col, sticky='w', padx=(0, 20), pady=3)
                 self.widgets[label_text[:-1]] = widget
 
-        # Frame separado para produtos
+        # Frame para produtos
         produto_frame = tk.LabelFrame(self.window, text="Itens do Pedido", font=self.font)
         produto_frame.pack(fill='x', pady=10)
 
@@ -118,7 +136,7 @@ class newOrder:
         )
         self.product_listbox.grid(row=3, column=0, columnspan=4, padx=(10, 10), pady=(0, 10))
 
-        # Botões finais
+        # Botões 
         action_frame = tk.Frame(self.window)
         action_frame.pack(fill='x')
         tk.Button(
@@ -190,9 +208,12 @@ class newOrder:
                 'regiao': self.widgets['Região'].get(),
                 'pais': self.widgets['País'].get(),
                 'freight': self.widgets['Frete'].get(),
-                'products': self.details
+                'order_details': self.details
             }
-            self.controller.criar_pedido(**data)
+            if(self.tipo_conexao=='orm'):
+                self.controller.criar_pedido(**data)
+            else:
+                self.controllerDriver.criar_pedido(**data)
             messagebox.showinfo("Sucesso", "Pedido criado com sucesso!")
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao criar pedido: {e}")

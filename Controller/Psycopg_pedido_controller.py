@@ -10,7 +10,7 @@ import datetime
 import decimal
 
 
-class PedidoController:
+class PedidoControllerDriver:
 
     def __init__(self):
         # Inicializa os DAOs
@@ -23,7 +23,6 @@ class PedidoController:
 
         # Armazena o último pedido criado e seus itens
         self.ultimo_orderid = None
-        self.itens_pedido = []
 
     def _gerar_orderid(self):
         query = "SELECT nextval('northwind.orders_id_sequence')"
@@ -33,9 +32,24 @@ class PedidoController:
                 result = cur.fetchone()
                 return result[0]
 
-    def criar_pedido(self, customerid, employeeid, shipperid, endereco, cidade, regiao, pais, cep, freight, requiredDate, shippedDate, shipName):
+    def criar_pedido(
+        self,
+        customerid,
+        employeeid,
+        shipperid,
+        endereco,
+        cidade,
+        regiao,
+        pais,
+        cep,
+        freight,
+        requiredDate,
+        shippedDate,
+        shipName,
+        order_details
+    ):
         orderid = self._gerar_orderid()  # Gera novo ID
-
+        
         pedido = {
             'orderid': orderid,
             'customerid': customerid,
@@ -55,32 +69,16 @@ class PedidoController:
 
         self.dao.create(pedido)  # Cria o pedido
         self.ultimo_orderid = orderid  # Armazena o orderid do pedido criado
-        self.itens_pedido = []  # Limpa itens anteriores (se houver)
-        return orderid
 
-    def adicionar_item_pedido(self, productid, unitprice, quantity, discount):
-        if self.ultimo_orderid is None:
-            raise Exception("Crie um pedido antes de adicionar itens.")
-
-        item = {
-            'orderid': self.ultimo_orderid,
-            'productid': productid,
-            'unitprice': unitprice if isinstance(unitprice, decimal.Decimal) else decimal.Decimal(unitprice),
-            'quantity': quantity,
-            'discount': discount if isinstance(discount, decimal.Decimal) else decimal.Decimal(discount)
-        }
-
-        self.itens_pedido.append(item)
-
-    def salvar_itens_pedido(self):
-        if not self.itens_pedido:
-            raise Exception("Nenhum item para salvar.")
-
-        for item in self.itens_pedido:
+        for detail in order_details:
+            item = {
+                'orderid': self.ultimo_orderid,
+                'productid': detail.productid,
+                'unitprice': detail.unitprice if isinstance(detail.unitprice, decimal.Decimal) else decimal.Decimal(detail.unitprice),
+                'quantity': detail.quantity,
+                'discount': detail.discount if isinstance(detail.discount, decimal.Decimal) else decimal.Decimal(detail.discount)
+            }
             self.order_details_dao.create(item)  # Salva cada item no OrderDetails
-
-        # Limpa a lista após salvar
-        self.itens_pedido = []
 
     # Métodos auxiliares
     def listar_clientes(self):
