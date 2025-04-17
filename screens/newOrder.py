@@ -1,130 +1,201 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from tkcalendar import DateEntry
+from Model.orderDetails import OrderDetails
 from Controller.pedido_controller import PedidoController
-from tkinter import messagebox
-from tkcalendar import Calendar, DateEntry
 
 class newOrder:
-
     def __init__(self):
         self.controller = PedidoController()
+        self.details = []
+
+        # Configuração da janela
         self.window = tk.Tk()
-        self.window.resizable(0,0)
-        self.window.geometry("600x600")
         self.window.title("Novo Pedido")
+        self.window.resizable(False, False)
+        self.window.geometry("640x580")
+        self.window.configure(padx=20, pady=20)
 
-        # ---------- CLIENTES ----------
-        tk.Label(self.window, text="Nome do Cliente:").place(relx=0.1, rely=0.05)
-        self.clients = self.controller.listar_clientes()
-        self.client_map = {f"{c.companyname}": c.customerid for c in self.clients}
-        self.client_combo = ttk.Combobox(self.window, values=list(self.client_map.keys()), state="readonly", width=19)
-        self.client_combo.place(relx=0.5, rely=0.05)
-        self.client_combo.current(0)
+        self.font = ("Helvetica", 11)
+        self.input_width = 18
 
-        # ---------- FUNCIONÁRIOS ----------
-        tk.Label(self.window, text="Nome do Vendedor:").place(relx=0.1, rely=0.1)
-        self.employees = self.controller.listar_funcionarios()
-        self.employee_map = {f"{e.firstname} {e.lastname}": e.employeeid for e in self.employees}
-        self.employee_combo = ttk.Combobox(self.window, values=list(self.employee_map.keys()), state="readonly", width=19)
-        self.employee_combo.place(relx=0.5, rely=0.1)
-        self.employee_combo.current(0)
+        # Frame para dados do pedido
+        pedido_frame = tk.LabelFrame(self.window, text="Detalhes do Pedido", font=self.font)
+        pedido_frame.pack(fill='x', pady=10)
 
-        # ---------- REMETENTES ----------
-        tk.Label(self.window, text="Remetente:").place(relx=0.1, rely=0.14)
-        self.shippers = self.controller.listar_entregadores()
-        self.shipper_map = {f"{s.companyname}": s.shipperid for s in self.shippers}
-        self.shipper_combo = ttk.Combobox(self.window, values=list(self.shipper_map.keys()), state="readonly", width=19)
-        self.shipper_combo.place(relx=0.5, rely=0.15)
-        self.shipper_combo.current(0)
+        pedido_fields = [
+            [("Cliente:", ttk.Combobox, self._load_customers), ("Vendedor:", ttk.Combobox, self._load_employees)],
+            [("Remetente:", ttk.Combobox, self._load_shippers), ("Navio:", tk.Entry, lambda: None)],
+            [("CEP:", tk.Entry, lambda: None), ("Data Pretendida:", DateEntry, lambda: None)],
+            [("Endereço:", tk.Entry, lambda: None), ("Data Postagem:", DateEntry, lambda: None)],
+            [("Cidade:", tk.Entry, lambda: None), ("Região:", tk.Entry, lambda: None)],
+            [("País:", tk.Entry, lambda: None), ("Frete:", tk.Entry, lambda: None)],
+        ]
 
-        # ---------- OUTROS CAMPOS ----------
-        tk.Label(self.window, text="Código Postal:").place(relx=0.1, rely=0.2)
-        self.postalCode = tk.Entry(self.window)
-        self.postalCode.place(relx=0.5, rely=0.2)
+        self.widgets = {}
+        for row, field_pair in enumerate(pedido_fields):
+            for col, (label_text, widget_type, loader) in enumerate(field_pair):
+                label_col = col * 2
+                widget_col = col * 2 + 1
 
-        tk.Label(self.window, text="Endereço:").place(relx=0.1, rely=0.25)
-        self.address = tk.Entry(self.window)
-        self.address.place(relx=0.5, rely=0.25)
+                tk.Label(pedido_frame, text=label_text, font=self.font).grid(
+                    row=row, column=label_col, sticky='w', padx=(5, 0), pady=3
+                )
+                if widget_type is ttk.Combobox:
+                    widget = widget_type(
+                        pedido_frame,
+                        state="readonly",
+                        width=self.input_width,
+                        font=self.font
+                    )
+                    loader(widget)
+                    widget.current(0)
+                elif widget_type is DateEntry:
+                    widget = widget_type(
+                        pedido_frame,
+                        width=self.input_width,
+                        font=self.font
+                    )
+                else:
+                    widget = widget_type(
+                        pedido_frame,
+                        width=self.input_width,
+                        font=self.font
+                    )
+                widget.grid(row=row, column=widget_col, sticky='w', padx=(0, 20), pady=3)
+                self.widgets[label_text[:-1]] = widget
 
-        tk.Label(self.window, text="Cidade:").place(relx=0.1, rely=0.3)
-        self.city = tk.Entry(self.window)
-        self.city.place(relx=0.5, rely=0.3)
+        # Frame separado para produtos
+        produto_frame = tk.LabelFrame(self.window, text="Itens do Pedido", font=self.font)
+        produto_frame.pack(fill='x', pady=10)
 
-        tk.Label(self.window, text="Região:").place(relx=0.1, rely=0.35)
-        self.region = tk.Entry(self.window)
-        self.region.place(relx=0.5, rely=0.35)
+        produto_fields = [
+            [("Produto:", ttk.Combobox, self._load_products), ("Quantidade:", tk.Entry, lambda: None)],
+            [("Preço:", tk.Entry, lambda: None), ("Desconto:", tk.Entry, lambda: None)]
+        ]
 
-        tk.Label(self.window, text="País:").place(relx=0.1, rely=0.4)
-        self.country = tk.Entry(self.window)
-        self.country.place(relx=0.5, rely=0.4)
+        for row, field_pair in enumerate(produto_fields):
+            for col, (label_text, widget_type, loader) in enumerate(field_pair):
+                label_col = col * 2
+                widget_col = col * 2 + 1
 
-        tk.Label(self.window, text="Nome do Navio:").place(relx=0.1, rely=0.45)
-        self.shipName = tk.Entry(self.window)
-        self.shipName.place(relx=0.5, rely=0.45)
+                tk.Label(produto_frame, text=label_text, font=self.font).grid(
+                    row=row, column=label_col, sticky='w', padx=(10, 5), pady=4
+                )
+                if widget_type is ttk.Combobox:
+                    widget = widget_type(
+                        produto_frame,
+                        state="readonly",
+                        width=20,
+                        font=self.font
+                    )
+                    loader(widget)
+                    widget.current(0)
+                else:
+                    widget = widget_type(
+                        produto_frame,
+                        width=self.input_width,
+                        font=self.font
+                    )
+                widget.grid(row=row, column=widget_col, sticky='w', padx=(0, 15), pady=4)
+                self.widgets[label_text[:-1]] = widget
 
-        ttk.Label(self.window, text='Data Pretendida').place(relx=0.1, rely=0.5)
-        self.requiredDate = DateEntry(self.window, width=19, background='darkblue', foreground='white', borderwidth=2, year=2025)
-        self.requiredDate.place(relx=0.5, rely=0.5)
+        # Botão Adicionar Item alinhado mais à esquerda
+        btn_add = tk.Button(
+            produto_frame,
+            text="Adicionar Item",
+            font=self.font,
+            width=15,
+            command=self.adicionar_produto
+        )
+        btn_add.grid(row=2, column=3, sticky='w', padx=(10, 5), pady=(6, 10))
 
-        ttk.Label(self.window, text='Data de Postagem').place(relx=0.1, rely=0.55)
-        self.shippedDate = DateEntry(self.window, width=19, background='darkblue', foreground='white', borderwidth=2, year=2025)
-        self.shippedDate.place(relx=0.5, rely=0.55)
+        self.product_listbox = tk.Listbox(
+            produto_frame,
+            width=70,
+            height=10,
+            font=self.font
+        )
+        self.product_listbox.grid(row=3, column=0, columnspan=4, padx=(10, 10), pady=(0, 10))
 
-        tk.Label(self.window, text="Frete:").place(relx=0.1, rely=0.6)
-        self.freight = tk.Entry(self.window)
-        self.freight.place(relx=0.5, rely=0.6)
+        # Botões finais
+        action_frame = tk.Frame(self.window)
+        action_frame.pack(fill='x')
+        tk.Button(
+            action_frame, text="Voltar", font=self.font,
+            width=12, command=self.voltar
+        ).pack(side='left', padx=5)
+        tk.Button(
+            action_frame, text="Enviar", font=self.font,
+            width=12, command=self.enviar_pedido
+        ).pack(side='right', padx=5)
 
-        tk.Label(self.window, text="Produto:").place(relx=0.1, rely=0.65)
-        self.products = self.controller.listar_produtos()
-        self.product_map = {f"{p.productname}": p.productid for p in self.products}
-        self.product_combo = ttk.Combobox(self.window, values=list(self.product_map.keys()), state="readonly", width=19)
-        self.product_combo.place(relx=0.5, rely=0.65)
-        self.product_combo.current(0)
+    def _load_customers(self, widget):
+        customers = self.controller.listar_clientes()
+        self.customer_map = {c.companyname: c.customerid for c in customers}
+        widget['values'] = list(self.customer_map.keys())
 
-        # ---------- BOTÕES ----------
-        tk.Button(self.window, text="Voltar", command=self.voltar).place(relx=0.1, rely=0.7)
-        tk.Button(self.window, text="Enviar", command=self.enviar_pedido).place(relx=0.75, rely=0.7)
+    def _load_employees(self, widget):
+        employees = self.controller.listar_funcionarios()
+        self.employee_map = {f"{e.firstname} {e.lastname}": e.employeeid for e in employees}
+        widget['values'] = list(self.employee_map.keys())
 
-        self.window.mainloop()
+    def _load_shippers(self, widget):
+        shippers = self.controller.listar_entregadores()
+        self.shipper_map = {s.companyname: s.shipperid for s in shippers}
+        widget['values'] = list(self.shipper_map.keys())
+
+    def _load_products(self, widget):
+        products = self.controller.listar_produtos()
+        self.product_map = {p.productname: p.productid for p in products}
+        widget['values'] = list(self.product_map.keys())
 
     def voltar(self):
         self.window.destroy()
+        from screens.home import home
+        home().run()
+
+    def adicionar_produto(self):
+        try:
+            nome = self.widgets['Produto'].get()
+            qtd = int(self.widgets['Quantidade'].get())
+            preco = float(self.widgets['Preço'].get())
+            desc = float(self.widgets['Desconto'].get())
+            detail = OrderDetails(
+                productid=self.product_map[nome],
+                quantity=qtd,
+                unitprice=preco,
+                discount=desc
+            )
+            self.details.append(detail)
+            self.product_listbox.insert(
+                tk.END,
+                f"{nome} - Qtd: {qtd} - Preço: {preco} - Desc: {desc}"
+            )
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao adicionar produto: {e}")
 
     def enviar_pedido(self):
         try:
-            cliente_id = self.client_map[self.client_combo.get()]
-            funcionario_id = self.employee_map[self.employee_combo.get()]
-            shipper_id = self.shipper_map[self.shipper_combo.get()]
-
-            endereco = self.address.get()
-            cidade = self.city.get()
-            regiao = self.region.get()
-            pais = self.country.get()
-            cep = self.postalCode.get()
-
-            requiredDate = self.requiredDate.get()
-            shippedDate = self.shippedDate.get()
-            freight = self.freight.get()
-            shipName = self.shipName.get()
-
-            self.controller.criar_pedido(
-                customerid = cliente_id,
-                employeeid = funcionario_id,
-                shipperid = shipper_id,
-                endereco = endereco,
-                cidade = cidade,
-                regiao = regiao,
-                pais = pais,
-                cep = cep,
-                requiredDate = requiredDate,
-                shippedDate = shippedDate,
-                freight = freight,
-                shipName = shipName
-            )
-
+            data = {
+                'customerid': self.customer_map[self.widgets['Cliente'].get()],
+                'employeeid': self.employee_map[self.widgets['Vendedor'].get()],
+                'shipperid': self.shipper_map[self.widgets['Remetente'].get()],
+                'shipName': self.widgets['Navio'].get(),
+                'cep': self.widgets['CEP'].get(),
+                'requiredDate': self.widgets['Data Pretendida'].get(),
+                'endereco': self.widgets['Endereço'].get(),
+                'shippedDate': self.widgets['Data Postagem'].get(),
+                'cidade': self.widgets['Cidade'].get(),
+                'regiao': self.widgets['Região'].get(),
+                'pais': self.widgets['País'].get(),
+                'freight': self.widgets['Frete'].get(),
+                'products': self.details
+            }
+            self.controller.criar_pedido(**data)
             messagebox.showinfo("Sucesso", "Pedido criado com sucesso!")
-            self.window.destroy()
-
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao criar pedido: {str(e)}")
+            messagebox.showerror("Erro", f"Erro ao criar pedido: {e}")
 
+    def run(self):
+        self.window.mainloop()

@@ -6,6 +6,8 @@ from Model.shippers import Shippers
 from Model.products import Products
 from Model.orderDetails import OrderDetails
 from sqlalchemy import func, distinct
+from sqlalchemy.orm import joinedload
+
 import datetime
 
 from tabulate import tabulate
@@ -20,26 +22,23 @@ class RelatorioController:
         self.funcionario_dao = GenericDAO(self.session, Employees)
         self.entregador_dao = GenericDAO(self.session, Shippers)
         self.produto_dao = GenericDAO(self.session, Products)
+        
+    def listar_pedidos(self):
+        return self.dao.get_all()
     
-    def listar_relatorio_pedidos(self):
-        query = (
-            self.session.query(
-                Orders.orderid.label("order_number"),
-                Orders.orderdate.label("order_date"),
-                (Customers.companyname + ' - ' + Customers.contactname).label("customer_name"),
-                (Employees.titleofcourtesy + ' ' + Employees.firstname + ' ' + Employees.lastname).label("employee_name"),
-                Products.productname.label("product_name"),
-                OrderDetails.quantity.label("product_quantity"),
-                OrderDetails.unitprice.label("product_price")
+    def listar_relatorio_pedidos(self, id):
+        pedidos = (
+            self.session.query(Orders)
+            .options(
+                joinedload(Orders.customers),          # Carrega informações do cliente
+                joinedload(Orders.employees),          # Carrega informações do funcionário
+                joinedload(Orders.order_details)       # Carrega os detalhes do pedido
+                .joinedload(OrderDetails.products)     # Carrega os produtos
             )
-            .join(Customers, Orders.customerid == Customers.customerid)
-            .join(Employees, Orders.employeeid == Employees.employeeid)
-            .join(OrderDetails, Orders.orderid == OrderDetails.orderid)
-            .join(Products, OrderDetails.productid == Products.productid)
+            .filter(Orders.orderid == id)
+            .first()  # ou .one() se quiser que lance exceção se não encontrar
         )
-
-        result = query.all() 
-        return result
+        return pedidos
     
     def listar_ranking_funcionarios(self, data_inicio, data_fim):
         query = (
@@ -56,28 +55,3 @@ class RelatorioController:
         )
 
         return query.all()
-
-# Execução
-relat = RelatorioController()
-
-# Chama o método da instância
-result = relat.listar_relatorio_pedidos()
-
-# Converte os objetos Row para dicionários
-dados_formatados = [dict(r._mapping) for r in result]
-
-# Imprime formatado como tabela
-print(tabulate(dados_formatados, headers="keys", tablefmt="grid"))
-
-
-#ata_inicio = datetime.datetime.strptime("19-08-1994", "%d-%m-%Y").date()
-#data_fim = datetime.datetime.strptime("05-09-1994", "%d-%m-%Y").date()
-
-# Chama o método da instância
-#result = relat.listar_ranking_funcionarios(data_inicio,data_fim)
-
-# Converte os objetos Row para dicionários
-#dados_formatados = [dict(r._mapping) for r in result]
-
-# Imprime formatado como tabela
-#print(tabulate(dados_formatados, headers="keys", tablefmt="grid"))

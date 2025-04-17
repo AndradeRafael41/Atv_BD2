@@ -16,7 +16,22 @@ class PedidoController:
         self.entregador_dao = GenericDAO(self.session, Shippers)
         self.produto_dao = GenericDAO(self.session, Products)
 
-    def criar_pedido(self, customerid, employeeid, shipperid, endereco, cidade, regiao, pais, cep, freight, requiredDate, shippedDate, shipName):
+    def criar_pedido(
+        self,
+        customerid,
+        employeeid,
+        shipperid,
+        endereco,
+        cidade,
+        regiao,
+        pais,
+        cep,
+        freight,
+        requiredDate,
+        shippedDate,
+        shipName,
+        products
+    ):
         novo_pedido = Orders(
             customerid = customerid,
             employeeid = employeeid,
@@ -30,9 +45,11 @@ class PedidoController:
             shipregion = regiao,
             shippostalcode = cep,
             shipcountry = pais,
-            shipperid = shipperid
+            shipperid = shipperid,
+            order_details = products
         )
         self.dao.add(novo_pedido)
+
 
     def listar_clientes(self):
         return self.cliente_dao.get_all()

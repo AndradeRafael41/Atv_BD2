@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .employees import Employees
     from .orderDetails import OrderDetails
 
-order_id_seq = Sequence('orders_id_sequence')
+order_id_seq = Sequence('orders_id_sequence', schema='northwind')
 
 
 class Orders(Base):
