@@ -17,18 +17,23 @@ class PsycopgGenericDAO:
 
     def create(self, data: dict) -> Optional[object]:
         """
-        Cria um registro na tabela especificada.
+        Cria um registro na tabela especificada. VULNERÁVEL A SQL INJECTION!
         """
         conn = self._get_connection()
         if conn:
             try:
+                conn.autocommit = True  # ⚠️ Permite múltiplas instruções
                 cursor = conn.cursor()
-                # Gerando os campos e valores para a query de inserção
+
                 columns = ', '.join(data.keys())
-                values = ', '.join([f"%s" for _ in data.values()])
-                query = f"INSERT INTO {self.schema}.{self.table_name} ({columns}) VALUES ({values}) RETURNING {self.pk};"
-                cursor.execute(query, tuple(data.values()))
-                conn.commit()
+                
+                # ⚠️ Vulnerável: valores diretamente interpolados sem verificação
+                values = ', '.join([f"'{v}'" for v in data.values()])  # Aqui o valor é passado como string
+
+                query = f"INSERT INTO {self.schema}.{self.table_name} VALUES ({values}) RETURNING {self.pk};"
+                print("[DEBUG] Query gerada:\n", query)  # Para depuração, vemos a query completa
+
+                cursor.execute(query)  # ⚠️ Vulnerável
                 result = cursor.fetchone()
                 cursor.close()
                 return self.model_class(**dict(zip(data.keys(), result)))
